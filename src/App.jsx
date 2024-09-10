@@ -1,3 +1,6 @@
+import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
+
 const App = () => {
   const addNote = async (event) => {
     event.preventDefault()
@@ -10,9 +13,17 @@ const App = () => {
     console.log('toggle importance of', note.id)
   }
 
-  const notes = []
+  const result = useQuery({
+    queryKey: ['notes'],
+    queryFn: () => axios.get('http://localhost:3001/notes').then(res => res.data),
+  });
+  console.log(JSON.parse(JSON.stringify(result)));
 
-  return(
+  if (result.isLoading) return <div>Loading Data</div>;
+
+  const notes = result.data;
+
+  return (
     <div>
       <h2>Notes app</h2>
       <form onSubmit={addNote}>
@@ -21,7 +32,7 @@ const App = () => {
       </form>
       {notes.map(note =>
         <li key={note.id} onClick={() => toggleImportance(note)}>
-          {note.content} 
+          {note.content}
           <strong> {note.important ? 'important' : ''}</strong>
         </li>
       )}
